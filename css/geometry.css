@@ -1,0 +1,186 @@
+/* ============================================================
+   geometry.css (V68) - layout geometry, touch targets and safe-area handling.
+   Loaded AFTER loading-orb.css and BEFORE rtl.css. It only overrides sizes / placement; colours, animations and every
+   selector the JS or the existing tests rely on are untouched, so the older rules above stay the single source for look & feel.
+
+   1. Loading modal (#loadingOverlay): sized from the CANVAS it sits in (container query), never from the screen, so the
+      orb + text + Cancel always fit - 320 px phones, 430 px phones and short landscape canvases alike.
+   2. Portrait canvas loader (#portraitCanvasLoader): larger counter, and a one-row layout when the canvas is short so the
+      face area stays uncovered.
+   3. Dialogs (.modal-overlay): safe-area insets on all four sides, height capped to the visible viewport, landscape-compact.
+   4. Touch targets: >= 44 x 44 px hit areas. Dense controls keep their look; an invisible pseudo-element / padding carries the
+      extra area (same technique as touch-layout.css Y6), so no row grows.
+   5. Floating cards (toast, on-device-AI card): left / right insets for landscape notches.
+
+   The orb is only ever resized through --orb-size. The ring maths (RING_LENGTH = 326.73 in js/ui/progress-counter.js) belongs to the
+   SVG's own 120 x 120 viewBox and r = 52, which this file never changes.
+   ============================================================ */
+
+/* ---------- 1. Loading modal ---------------------------------------------------------------------------------------- */
+.loading-overlay {
+    /* The overlay is absolutely positioned with inset 0, so it has a definite size: the children can query it. */
+    container-type: size;
+    container-name: yo-loading;
+    overflow: hidden;
+    padding: 8px;
+    /* Grid, so the same markup can be a column (tall canvas) or orb-left / text-right (short canvas) - see below. */
+    grid-template-columns: auto auto;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: center;
+    row-gap: 8px;
+    column-gap: 16px;
+}
+.loading-overlay.active,
+.loading-overlay.finishing { display: grid; }
+
+/* Column layout (default): every child spans both columns and is centred. */
+.loading-overlay > * { grid-column: 1 / -1; min-width: 0; }
+.loading-overlay > .loading-text,
+.loading-overlay > .loading-sub { max-width: min(100%, 320px); text-align: center; overflow-wrap: anywhere; }
+.loading-overlay > .loading-text { line-height: 1.25; }
+
+/* Orb: scales with the canvas (36 % of its width / 44 % of its height), 72 .. 132 px. vw / vh fallback first. */
+.loading-overlay .yo-orb { --orb-size: clamp(72px, min(34vw, 24vh), 132px); }
+@supports (width: 1cqw) {
+    .loading-overlay .yo-orb { --orb-size: clamp(72px, min(36cqw, 44cqh), 132px); }
+}
+
+/* Cancel is the modal's primary action: a real 44 px button. */
+.loading-overlay .island-cancel { min-height: 44px; min-width: 120px; margin-top: 0; }
+
+/* Short canvas (landscape phones, short portrait canvases): orb on the left, text + Cancel on the right. */
+@container yo-loading (max-height: 190px) {
+    .loading-overlay > * { grid-column: 2; justify-self: start; }
+    .loading-overlay > .loading-text,
+    .loading-overlay > .loading-sub { text-align: start; max-width: min(56cqw, 280px); }
+    .loading-overlay > .yo-orb,
+    .loading-overlay > .spinner { grid-column: 1; grid-row: 1 / span 5; justify-self: center; align-self: center; }
+    .loading-overlay .yo-orb { --orb-size: clamp(56px, 62cqh, 100px); }
+    .loading-overlay { row-gap: 6px; }
+}
+/* No container-query support (old WebViews): a viewport-based approximation of the same one-row layout. */
+@supports not (container-type: size) {
+    @media (max-height: 520px) {
+        .loading-overlay > * { grid-column: 2; justify-self: start; }
+        .loading-overlay > .yo-orb, .loading-overlay > .spinner { grid-column: 1; grid-row: 1 / span 5; justify-self: center; }
+        .loading-overlay .yo-orb { --orb-size: clamp(56px, 20vh, 84px); }
+    }
+}
+
+/* ---------- 2. Portrait canvas loader ------------------------------------------------------------------------------- */
+.portrait-canvas-loader {
+    container-type: size;
+    container-name: yo-ploader;
+    padding-top: clamp(8px, 2.4vh, 16px);
+    grid-template-columns: auto auto;
+    justify-content: center;
+    align-content: start;
+    justify-items: center;
+    align-items: center;
+    row-gap: 8px;
+    column-gap: 10px;
+}
+.portrait-canvas-loader.on { display: grid; }
+.portrait-canvas-loader > * { grid-column: 1 / -1; min-width: 0; }
+/* The counter was 58 px with a 15.7 px number; 64 .. 84 px (number 17 .. 23 px) is legible on every phone. */
+.portrait-canvas-loader .yo-orb--sm { --orb-size: clamp(64px, 18vw, 84px); }
+.portrait-canvas-loader__text { max-width: min(calc(100% - 32px), 320px); }
+
+/* Short canvas: the status pill sits BESIDE the orb instead of under it, so the loader only covers one thin strip at the top. */
+@container yo-ploader (max-height: 320px) {
+    .portrait-canvas-loader > .yo-orb { grid-column: 1; }
+    .portrait-canvas-loader > .portrait-canvas-loader__text {
+        grid-column: 2; justify-self: start; max-width: min(64cqw, 260px);
+    }
+}
+/* Very short canvas (landscape phones, ~110-170 px): a 56..64 px orb in the top-start CORNER, not top-centre - the photo's
+   subject sits in the middle of the canvas, the corner is empty. Start-aligned, so it also mirrors in Arabic / RTL. */
+@container yo-ploader (max-height: 200px) {
+    .portrait-canvas-loader .yo-orb--sm { --orb-size: clamp(56px, 44cqh, 64px); }
+}
+/* (A container query cannot restyle its own container, so the loader's own placement uses the viewport height: every canvas
+   under ~200 px tall is a landscape phone, whose viewport is <= 520 px high.) */
+@media (max-height: 520px) {
+    .portrait-canvas-loader { justify-content: start; padding-inline-start: 12px; padding-top: 8px; }
+}
+@supports not (container-type: size) {
+    @media (max-height: 520px) {
+        .portrait-canvas-loader > .yo-orb { grid-column: 1; }
+        .portrait-canvas-loader > .portrait-canvas-loader__text { grid-column: 2; justify-self: start; }
+        .portrait-canvas-loader .yo-orb--sm { --orb-size: 56px; }
+    }
+}
+
+/* ---------- 3. Dialogs (Premium, Export) ---------------------------------------------------------------------------- */
+.modal-overlay {
+    --m-top:    max(16px, env(safe-area-inset-top, 0px));
+    --m-right:  max(16px, env(safe-area-inset-right, 0px));
+    --m-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    --m-left:   max(16px, env(safe-area-inset-left, 0px));
+    padding: var(--m-top) var(--m-right) var(--m-bottom) var(--m-left);
+}
+.modal-overlay .modal-content {
+    max-height: calc(100vh - var(--m-top) - var(--m-bottom));
+    overflow-y: auto;
+}
+@supports (height: 100dvh) {
+    .modal-overlay .modal-content { max-height: calc(100dvh - var(--m-top) - var(--m-bottom)); }
+}
+/* Close = 44 x 44 on every pointer type (it was 32 px unless the device reported a coarse pointer); the title keeps clear of it. */
+.modal-close { width: 44px; height: 44px; top: 6px; inset-inline-end: 6px; }
+.modal-title { padding-inline: 24px; }
+.modal-btn { min-height: 44px; }
+
+/* Landscape phones: less chrome, so the dialog's content (not its padding) gets the scarce height. */
+@media (max-height: 520px) {
+    .modal-overlay { --m-top: max(8px, env(safe-area-inset-top, 0px)); --m-bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+    .modal-overlay .modal-content { padding: 16px 22px; max-width: min(420px, 100%); }
+    .modal-icon { font-size: 32px; margin-bottom: 6px; }
+    .modal-title { font-size: 18px; margin-bottom: 4px; }
+    .modal-price { font-size: 26px; margin: 6px 0; }
+    .modal-features { margin: 8px 0; }
+    .modal-features li { padding: 3px 0; }
+}
+
+/* ---------- 4. Touch targets --------------------------------------------------------------------------------------- */
+/* Bottom-nav tabs: real 44 px+ boxes (they measured 42 px on compact phones and 34 px in landscape). Slimmer margins, same pill. */
+@media (max-height: 720px) and (min-height: 521px) {
+    .main-nav .nav-tab { margin: 2px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+    .main-nav { height: 52px; min-height: 52px; }
+    .main-nav .nav-tab { margin: 2px; }
+}
+
+@media (pointer: coarse) {
+    .sub-btn { min-width: 44px; }
+    .edge-ai-btn { min-height: 44px; }
+    /* Magic-eraser brush sliders: a 44 px touch band (the 5 px track is unchanged). */
+    .me-slider { height: 44px; }
+    /* Frame-tab slider rows were 30 px apart, so a 44 px band would collide with its neighbours' bands: the rows are 44 px. */
+    .frame-ctrl-row { min-height: 44px; }
+    /* Panel sliders: the visible track stays 5 px; padding adds a 44 px touch band without growing the row
+       (the negative margin cancels the padding). Neighbouring rows are >= 42 px apart, so the bands never overlap. */
+    .tool-slider {
+        box-sizing: content-box;
+        padding-block: 19.5px; margin-block: -19.5px;
+        background-clip: content-box;
+    }
+}
+
+/* Landscape phones: the sub-menu bar was 42 px (mobile.css) and clipped its 44 px buttons to 42. 48 px bar, 2 px padding. */
+@media (max-height: 520px) and (orientation: landscape) {
+    .sub-menu-bar { height: 48px; min-height: 48px; padding: 2px 10px; }
+}
+
+/* ---------- 5. Floating cards: landscape notch insets --------------------------------------------------------------- */
+.toast { max-width: min(calc(100vw - 2 * max(12px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))), 420px); }
+.edge-ai-card {
+    width: min(calc(100vw - 2 * max(12px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))), 380px);
+}
+@media (max-height: 520px) and (orientation: landscape) {
+    .edge-ai-card { bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+}
+/* ===== END geometry.css ===== */

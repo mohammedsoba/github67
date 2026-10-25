@@ -1,0 +1,33 @@
+/* ===== rtl.css - Arabic RTL layout ===== */
+/* Y10: <html dir="rtl"> (set by applyI18n) already mirrors every flex/grid row, text alignment and the
+   start/end of logical properties. The old file ALSO set flex-direction: row-reverse on those rows, which
+   reversed them a second time (the layout came out un-mirrored). Those overrides are gone. What remains:
+   the font, and a few deliberate "direction-neutral" islands that must keep their left-to-right order. */
+
+body.rtl,
+body.rtl * {
+    font-family: 'Tajawal', 'Noto Sans Arabic', 'Arial', sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+/* Sliders keep increasing to the right, with "-" on the left and "+" on the right, in both languages.
+   Only the label/value block inside the row is mirrored. */
+body.rtl .tool-row,
+body.rtl .frame-ctrl-row { direction: ltr; }
+body.rtl .tool-meta { direction: rtl; }
+body.rtl .frame-ctrl-lbl { direction: rtl; text-align: start; }
+
+/* Hue order of the Color Mix swatches, the curve canvas and the eraser toolbar are direction-neutral */
+body.rtl .color-circles,
+body.rtl .me-toolbar,
+body.rtl .curves-svg { direction: ltr; }
+
+/* Centered content stays centered */
+body.rtl .upload-box,
+body.rtl .curves-container p { text-align: center; }
+
+/* Absolutely positioned affordances anchored to a physical side flip with the writing direction
+   (the floating Undo/Original cluster stays bottom-left on purpose - see polish.css "thumb zone") */
+[dir="rtl"] .preset-badge { right: auto; left: 2px; }
+
+/* ===== END rtl.css ===== */

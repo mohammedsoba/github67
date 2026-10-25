@@ -1,0 +1,20 @@
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.mutbak
+
+# on-device portrait runtime (scripts/fetch_ort.py) - fetched, not committed; ORT.sha256 + README stay tracked
+vendor/ort/*.mjs
+vendor/ort/*.wasm
+vendor/ort/*.part
+
+# MediaPipe segmenter (scripts/fetch_mediapipe_assets.py) - fetched, not committed; scripts/MEDIAPIPE.sha256 + README stay tracked
+vendor/mediapipe/*
+!vendor/mediapipe/README.md
+
+# ONNX models are fetched (Hugging Face), never committed - MODELS.sha256 stays tracked
+backend/models/*.onnx
+backend/models/*.part

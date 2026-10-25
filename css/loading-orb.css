@@ -1,0 +1,158 @@
+/* ===== loading-orb.css - the 1 -> 100 counter orb ===== */
+/* Used by the loading overlay (#loadingOrb, js/ui/loading-toast.js) and by Portrait's canvas loader (.yo-orb--sm).
+   The number and the ring are driven by js/ui/progress-counter.js. Only transform / opacity animate continuously (the
+   spinning halo and the pulsing glow), so they keep moving on the compositor even while the main thread is busy
+   with a heavy model run; the ring and the number advance whenever the main thread gets a frame. */
+
+.yo-orb {
+    --orb-size: 132px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--orb-size);
+    height: var(--orb-size);
+    pointer-events: none;
+}
+/* display:grid above would otherwise win over the [hidden] attribute */
+.yo-orb[hidden] { display: none; }
+.yo-orb--sm { --orb-size: 58px; }
+
+/* Spinning comet ring just outside the progress ring. */
+.yo-orb__halo {
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, transparent 190deg, var(--accent-light, #a5b4fc) 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+    opacity: 0.9;
+    animation: yoOrbSpin 1.4s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+.yo-orb--sm .yo-orb__halo { inset: -5px; }
+
+/* Counter-rotating dotted ring inside the progress ring: a second, slower motion so the orb never looks stalled.
+   Pure CSS (transform only), like the halo - it keeps turning while JavaScript is blocked by an inference. */
+.yo-orb__orbit {
+    position: absolute;
+    inset: 11%;
+    border-radius: 50%;
+    border: 2px dotted rgba(255, 255, 255, 0.28);
+    animation: yoOrbSpinRev 5s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Soft breathing glow behind the number. */
+.yo-orb__glow {
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow, rgba(99, 102, 241, 0.28)) 0%, transparent 68%);
+    animation: yoOrbPulse 2.2s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+/* Progress ring: starts at 12 o'clock, fills clockwise. 326.73 = 2 * PI * 52 (RING_LENGTH in progress-counter.js). */
+.yo-orb__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transform: rotate(-90deg);
+}
+.yo-orb__track,
+.yo-orb__arc { fill: none; stroke-width: 5; }
+.yo-orb__track { stroke: rgba(255, 255, 255, 0.14); }
+.yo-orb__arc {
+    stroke: var(--accent, #6366f1);
+    stroke-linecap: round;
+    stroke-dasharray: 326.73;
+    stroke-dashoffset: 326.73;
+    transition: stroke-dashoffset 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+    filter: drop-shadow(0 0 5px var(--accent-glow, rgba(99, 102, 241, 0.28)));
+}
+
+/* The number. dir="ltr" in the markup + unicode-bidi keep "45%" from flipping to "%45" in the Arabic (RTL) layout. */
+.yo-orb__count {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-size: calc(var(--orb-size) * 0.27);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary, #f5f5f7);
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+.yo-orb__pct {
+    margin-inline-start: 1px;
+    font-size: 0.45em;
+    font-weight: 600;
+    color: var(--text-secondary, #a5a5ae);
+}
+
+@keyframes yoOrbSpin { to { transform: rotate(360deg); } }
+@keyframes yoOrbSpinRev { to { transform: rotate(-360deg); } }
+@keyframes yoOrbBreathe { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes yoOrbPulse {
+    0%, 100% { transform: scale(0.88); opacity: 0.55; }
+    50%      { transform: scale(1.08); opacity: 1; }
+}
+
+/* ---- Portrait: compact orb on a glass disc, bottom-centre of the canvas (the loader itself never takes pointer events) ---- */
+.portrait-canvas-loader .yo-orb {
+    border-radius: 50%;
+    background: rgba(10, 10, 12, 0.55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+/* ---- Finish: after hideLoading() the overlay is already closed ('active' removed, nothing is blocked). This click-through
+   layer keeps the full ring and "100" visible for a beat, then fades out. js/ui/loading-toast.js removes it after FINISH_MS. ---- */
+.loading-overlay.finishing {
+    display: flex;
+    pointer-events: none;
+    animation: yoOverlayOut 0.52s ease-in forwards;
+}
+/* The Cancel button is hidden the moment the operation ends; keep its space (invisible) so the orb does not jump while fading. */
+.loading-overlay.finishing.keep-cancel-space .island-cancel { display: inline-flex; visibility: hidden; }
+.loading-overlay.finishing .yo-orb { animation: yoOrbPop 0.3s ease-out; }
+.loading-overlay.finishing .yo-orb__arc { transition-duration: 0.2s; }
+@keyframes yoOverlayOut {
+    0%, 45% { opacity: 1; }
+    100%    { opacity: 0; }
+}
+@keyframes yoOrbPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.07); }
+    100% { transform: scale(1); }
+}
+
+/* ---- Portrait finish: same beat as the overlay - full ring and "100" held briefly, a small pop, then a fade. js/portrait/portrait-mode.js removes 'on' after PORTRAIT_FINISH_MS. ---- */
+.portrait-canvas-loader.finishing { animation: yoOverlayOut 0.52s ease-in forwards; }
+.portrait-canvas-loader.finishing .yo-orb { animation: yoOrbPop 0.3s ease-out; }
+.portrait-canvas-loader.finishing .yo-orb__arc { transition-duration: 0.2s; }
+
+/* Reduced motion: no rotation (that is what the setting is about), but the orb must not look frozen either - some phones
+   switch this on with battery saver / "remove animations". A slow opacity breathing keeps the constant feedback. */
+@media (prefers-reduced-motion: reduce) {
+    .yo-orb__halo { animation: yoOrbBreathe 2.4s ease-in-out infinite; opacity: 0.6; }
+    .yo-orb__orbit { display: none; }
+    .yo-orb__glow { animation: yoOrbBreathe 2.4s ease-in-out infinite; opacity: 0.8; }
+    .yo-orb__arc { transition: none; }
+    .portrait-canvas-loader.finishing,
+    .portrait-canvas-loader.finishing .yo-orb,
+    .loading-overlay.finishing,
+    .loading-overlay.finishing .yo-orb { animation: none; }
+}
+/* ===== END loading-orb.css ===== */

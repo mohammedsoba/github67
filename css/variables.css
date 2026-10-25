@@ -1,0 +1,59 @@
+/* ===== variables.css - design tokens (Obsidian / Indigo) ===== */
+/* One quiet palette: deep neutral surfaces that step up in lightness (never pure black), hairline borders,
+   a single muted-indigo accent, and soft elevation. Every colour in css/*.css points back to a token here.
+   Contrast (WCAG 2.1, measured on --bg-card #1e1e24): text-primary 14.2:1, text-secondary 8.0:1, text-muted 5.0:1,
+   accent-light 8.3:1; white on --accent-solid 5.0:1. --accent itself (#6366f1) is for non-text UI (rings, fills,
+   sliders, icons: >= 3.7:1); anything that carries white text uses --accent-solid / --accent-gradient. */
+        :root {
+            color-scheme: dark;
+
+            /* Surfaces: app canvas -> bars/panels -> recessed wells -> cards/modals -> raised/hover */
+            --bg-primary:   #0f0f12;
+            --bg-secondary: #16161a;
+            --bg-tertiary:  #1a1a20;
+            --bg-card:      #1e1e24;
+            --bg-raised:    #26262e;
+
+            /* Hairlines */
+            --border:        rgba(255, 255, 255, 0.06);
+            --border-light:  rgba(255, 255, 255, 0.08);
+            --border-hover:  rgba(255, 255, 255, 0.16);
+
+            /* Text */
+            --text-primary:   #ededf1;
+            --text-secondary: #b3b3be;
+            --text-muted:     #8c8c9a;
+
+            /* Accent: muted indigo */
+            --accent:          #6366f1;                       /* rings, fills, icons, slider thumbs' halo */
+            --accent-solid:    #5a5de8;                       /* fills that carry white text */
+            --accent-light:    #a5b4fc;                       /* accent used AS text / focus ring on dark */
+            --accent-glow:     rgba(99, 102, 241, 0.28);
+            --accent-gradient: linear-gradient(180deg, #6164ea 0%, #5457de 100%);   /* one hue, a whisper of sheen */
+            --accent-soft:     rgba(99, 102, 241, 0.12);
+            --on-accent:       #ffffff;
+
+            /* Premium (muted gold) */
+            --gold:    #dfb25c;
+            --on-gold: #1c1405;
+
+            --glass: rgba(22, 22, 26, 0.78);
+
+            /* Status */
+            --success: #4cc38a;
+            --warning: #e2ad4f;
+            --danger:  #ef6b7e;
+
+            --radius-sm: 9px;
+            --radius-md: 13px;
+            --radius-lg: 17px;
+            --radius-xl: 22px;
+
+            /* Elevation: low, wide, soft */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.18);
+            --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.30);
+            --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.42);
+            --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.30), 0 6px 20px rgba(99, 102, 241, 0.14);
+        }
+        ::selection { background: rgba(99, 102, 241, 0.38); color: #fff; }
+/* ===== END variables.css ===== */

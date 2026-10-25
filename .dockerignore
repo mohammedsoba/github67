@@ -1,0 +1,29 @@
+# Keep the build context small and the image free of dev / mobile-build material.
+.git
+.github
+.gitignore
+.gitattributes
+node_modules
+test-results
+playwright-report
+__pycache__
+*.pyc
+.pytest_cache
+*.mutbak
+tests
+docs
+README.md
+config.xml
+package.json
+playwright.config.js
+pytest.ini
+requirements-dev.txt
+Procfile
+Dockerfile
+.dockerignore
+# Models are NEVER taken from the build context: they are downloaded and verified inside the image build.
+backend/models/*.onnx
+backend/models/*.part
+# vendor/ is never taken from the build context: the MediaPipe assets are downloaded and verified inside the image build (stage
+# "mediapipe"); the on-device portrait runtime (vendor/ort) is not baked into the image.
+vendor

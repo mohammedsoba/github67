@@ -1,0 +1,7 @@
+{
+  "name": "YoFilter",
+  "api_title": "YoFilter API",
+  "version": "1.0.0",
+  "native_api_base": "https://web-production-7211e.up.railway.app",
+  "edge_model_url": ""
+}

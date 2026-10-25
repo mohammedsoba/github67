@@ -1,0 +1,54 @@
+/* On-device AI: one-time model download card (js/ui/edge-model-ui.js). Non-blocking: a floating glass card, no overlay. */
+.edge-ai-card {
+    position: fixed;
+    left: 50%;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    width: min(92vw, 380px);
+    transform: translate(-50%, 12px);
+    opacity: 0;
+    z-index: 9000;
+    padding: 12px 14px 12px;
+    border-radius: 18px;
+    background: rgba(30, 30, 36, 0.86);
+    border: 1px solid var(--border-light);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
+    color: var(--text-primary);
+    font-size: 12.5px;
+    line-height: 1.4;
+    transition: opacity 180ms ease, transform 180ms ease;
+    pointer-events: none;                    /* the card itself never blocks the editor ... */
+}
+.edge-ai-card.on { opacity: 1; transform: translate(-50%, 0); }
+.edge-ai-card[hidden] { display: none; }
+.edge-ai-card .edge-ai-actions, .edge-ai-card .edge-ai-btn { pointer-events: auto; }   /* ... only its buttons are tappable */
+.edge-ai-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.edge-ai-title { font-weight: 600; flex: 1 1 auto; min-width: 0; }
+.edge-ai-pct { font-variant-numeric: tabular-nums; color: var(--accent-light); font-weight: 700; }
+.edge-ai-bar { position: relative; height: 6px; margin: 9px 0 6px; border-radius: 6px; overflow: hidden; background: rgba(255, 255, 255, 0.10); }
+.edge-ai-fill {
+    position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(90deg, #5457de, #818cf8);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 160ms linear;
+}
+html[dir="rtl"] .edge-ai-fill { transform-origin: right center; }
+.edge-ai-bar.indeterminate .edge-ai-fill { width: 40%; transform: none; animation: edge-ai-slide 1.1s ease-in-out infinite; }
+html[dir="rtl"] .edge-ai-bar.indeterminate .edge-ai-fill { animation-direction: reverse; }
+@keyframes edge-ai-slide { 0% { left: -40%; } 100% { left: 100%; } }
+.edge-ai-sub { color: var(--text-muted); font-variant-numeric: tabular-nums; min-height: 1em; }
+.edge-ai-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+.edge-ai-actions:empty { display: none; }
+.edge-ai-btn {
+    min-height: 36px; padding: 0 14px; border-radius: 12px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-light); color: inherit; font: inherit; font-weight: 600;
+}
+.edge-ai-btn.primary { background: var(--accent-fill); border-color: var(--accent-edge); color: var(--accent-light); }
+.edge-ai-btn[hidden] { display: none; }
+.edge-ai-card.error .edge-ai-bar { display: none; }
+.edge-ai-card.error .edge-ai-title { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) {
+    .edge-ai-card, .edge-ai-fill { transition: none; }
+    .edge-ai-bar.indeterminate .edge-ai-fill { animation: none; width: 100%; left: 0; }
+}

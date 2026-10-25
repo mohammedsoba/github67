@@ -1,0 +1,57 @@
+/* ===== base.css — extracted from studio.html ===== */
+/* ===== Self-hosted fonts (Task P1.5) — no third-party font requests =====
+   Both files are variable WOFF2 subsets (weights 100-900), SIL OFL 1.1 — see fonts/README.md.
+   font-display: swap => text paints immediately in the fallback face, then swaps. */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/inter-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Arabic is only downloaded when Arabic characters are actually rendered (unicode-range). */
+@font-face {
+    font-family: 'Noto Sans Arabic';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('../fonts/noto-sans-arabic.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+200C-200F, U+2010-2011, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            /* Crisp sub-pixel font rendering on all platforms */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        html, body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            /* Prevent browser from artificially inflating text (causes blur on mobile) */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            /* High-quality scaling for photographic images */
+            image-rendering: -webkit-optimize-contrast; /* WebKit: sharper downscaling */
+            image-rendering: high-quality;              /* Standard: best interpolation */
+        }
+        /* Precise geometry for all inline SVG icons */
+        svg {
+            shape-rendering: geometricPrecision;
+        }
+/* ===== END base.css ===== */

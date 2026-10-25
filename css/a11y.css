@@ -1,0 +1,31 @@
+/* a11y.css - Y17: visible keyboard focus for every control that became a <button>, switch styling,
+   and the logical (RTL-safe) icon spacing that replaced inline margin-right. Loaded after touch-layout.css. */
+.opt-box:focus-visible, .mask-chip:focus-visible, .preset-item:focus-visible, .color-dot:focus-visible,
+.nav-tab:focus-visible, .sub-btn:focus-visible, .crop-btn:focus-visible, .quality-btn:focus-visible,
+.modal-close:focus-visible, .modal-btn:focus-visible, .toggle-switch:focus-visible, .top-btn:focus-visible,
+.tool-btn:focus-visible, .me-btn:focus-visible, .studio-btn:focus-visible, .ai-btn:focus-visible {
+    outline: 2px solid var(--accent-light, #a5b4fc);
+    outline-offset: 2px;
+}
+.modal-content:focus { outline: none; }
+
+/* decorative icon in front of a button label: spacing follows the writing direction */
+.btn-ico { vertical-align: middle; margin-inline-end: 4px; }
+.btn-ico-lg { margin-inline-end: 6px; }
+.modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+/* Settings: switch row */
+.sheet-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.sheet-switch-text { min-width: 0; flex: 1; }
+.sheet-switch-text .about-text { margin: 4px 0 0; }
+button.toggle-switch { border: 0; padding: 0; position: relative; flex-shrink: 0; }
+button.toggle-switch::before { content: ''; position: absolute; inset: -12px -4px; }   /* 44px hit area */
+[dir="rtl"] .toggle-switch::after { left: auto; right: 2px; }
+[dir="rtl"] .toggle-switch.active::after { left: auto; right: 18px; }
+
+/* Frame colour controls that do not apply to the chosen frame */
+.frame-color-row.is-disabled .frame-ctrl-lbl,
+.frame-color-row.is-disabled .frame-color-input,
+.frame-color-row.is-disabled .frame-color-toggle { opacity: 0.4; }
+.frame-color-note { font-size: 10.5px; color: var(--text-muted); margin: 2px 0 0; }
+.frame-color-note[hidden] { display: none; }

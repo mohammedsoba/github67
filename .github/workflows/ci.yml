@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update_golden:
+        description: "Regenerate tests/backend/golden.json on this runner and upload it as an artifact (no strict checks)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      LAMA_PROVIDER: cpu
+      PORTRAIT_PROVIDER: cpu
+      LAMA_THREADS: "1"
+      LAMA_WARMUP_PASSES: "0"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false            # models are not in Git/LFS: they come from the cache or Hugging Face (below)
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ---- ONNX models (~190 MB) -------------------------------------------------------------------
+      # 1) cache  2) Hugging Face (scripts/fetch_models.py default; override with the MODEL_BASE_URL repo variable).
+      # scripts/fetch_models.py verifies sha256 (backend/models/MODELS.sha256), so a pointer/error-page file or a
+      # truncated download can never reach the tests as a "model".
+      - name: Restore model cache
+        uses: actions/cache@v4
+        with:
+          path: backend/models/*.onnx
+          key: onnx-models-${{ hashFiles('backend/models/MODELS.sha256') }}
+
+      - name: Ensure ONNX models are present and valid
+        env:
+          MODEL_BASE_URL: ${{ vars.MODEL_BASE_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch_models.py
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      # ---- Maintainer escape hatch: regenerate goldens ON THE RUNNER (ORT float kernels can differ by CPU) ----
+      - name: Regenerate golden hashes (manual run only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_golden }}
+        env:
+          UPDATE_GOLDEN: "1"
+        run: python -m pytest tests/backend/test_pipeline_golden.py
+
+      - name: Upload regenerated golden.json
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_golden }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-json
+          path: tests/backend/golden.json
+
+      # ---- Strict suites (skipped on a golden-regeneration run) -----------------------------------------
+      - name: Backend tests (golden pipeline + API contract)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update_golden) }}
+        env:
+          REQUIRE_GOLDEN: "1"
+        run: python -m pytest tests/backend
+
+      - name: Mutation check (one-pixel change in lama.py must fail the golden test)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update_golden) }}
+        run: python scripts/mutation_check.py
+
+      - name: Node UI logic tests
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update_golden) }}
+        run: node tests/ui/run_all.js
+
+      - name: Install Playwright (chromium)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update_golden) }}
+        run: |
+          if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+          npx playwright install --with-deps chromium
+
+      - name: E2E smoke test (live uvicorn)
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update_golden) }}
+        env:
+          CI: "true"
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

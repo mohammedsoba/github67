@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "onnxruntime": "1.24.4",
+    "numpy": "2.4.4",
+    "opencv": "4.13.0.92",
+    "pillow": "12.1.1",
+    "lama_model": "7df918ac3921d3da",
+    "portrait_model": "d2b11a11c1d4a12b"
+  },
+  "erase/corner_bottom_right": "7fbab017eb449cbb",
+  "erase/large_blob": "691142c4bea44ea8",
+  "erase/small_center": "595361cf1353fd90",
+  "erase/wide_band_top_edge": "40181c208364c37d",
+  "portrait/blur12_center": "495403e6f0c3d35d",
+  "portrait/blur30_focus_left": "4397a61c1c14f068",
+  "portrait/blur8_skin40_combo": "c2a0a6d7c5dda898",
+  "portrait/sharp_untouched": "d6463c8110b694a1",
+  "portrait/skin60_only": "325db92e4f79a0f0"
+}

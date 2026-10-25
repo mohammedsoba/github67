@@ -1,0 +1,102 @@
+/* ============================================================
+   touch-layout.css (V20) - Y5 touch-action, Y6 hit targets, Y7 compact panel,
+   Y8 curves canvas, Y9 slider-label collision guard.
+   Loaded after polish.css / settings.css and BEFORE rtl.css.
+   ============================================================ */
+
+/* ---------- Y5: pinch-zoom is allowed again (viewport meta no longer blocks it), so every surface that
+   uses drags for editing must say so with touch-action instead of relying on user-scalable=no. ---------- */
+html, body { touch-action: manipulation; }          /* pinch-zoom stays; no double-tap-to-zoom delay */
+.crop-overlay, .crop-handle, #overlayCanvas, .me-paint-layer, .me-paint-cursor,
+#curvesCanvas, #compareBtn {
+    touch-action: none;                              /* the app handles these drags itself */
+}
+input[type="range"] { touch-action: pan-y; }        /* horizontal = slider, vertical = scroll the panel */
+.panel-content, .presets-grid { touch-action: pan-x pan-y; }
+
+/* ---------- Y6: 44px hit targets. Dense controls keep their look; an invisible 44x44 pseudo-element
+   carries the touch area so slider rows do not grow (that would fight Y7). ---------- */
+.tool-btn { position: relative; }                       /* .color-dot is already relative; .crop-handle / .compare-btn already absolute */
+.tool-btn::after, .crop-handle::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 44px; height: 44px; transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.color-dot::before {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 44px; height: 44px; transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+.compare-btn::after { content: ''; position: absolute; inset: -10px; }
+/* Crop corners: keep the visual 18px dot, enlarge the grab area (also in the media-query variant of responsive.css) */
+.crop-handle { overflow: visible; }
+
+@media (pointer: coarse) {
+    .sub-btn, .opt-box, .frame-cat, .frame-reset-btn, .frame-color-toggle,
+    .channel-btn, .curve-reset-btn, .quality-btn { min-height: 44px; }
+    .channel-btn, .curve-reset-btn { min-width: 44px; }
+    .modal-close { width: 44px; height: 44px; }
+    .sub-btn { display: inline-flex; align-items: center; justify-content: center; }
+}
+
+/* ---------- Y7: compact phones (about 360x640). The floating nav pill used to hide ~90px of a 244px panel,
+   leaving roughly one slider row. Here the pill sits IN the flow (nothing scrolls under it), is a little
+   slimmer, and the panel gets a larger share of the screen; .panel-content scrolls. ---------- */
+@media (max-height: 720px) and (min-height: 521px) {
+    :root {
+        --nav-h: 52px;
+        --nav-offset: calc(env(safe-area-inset-bottom, 0px) * 0.5 + 6px);
+    }
+    .main-nav {
+        position: relative; left: auto; right: auto; bottom: auto;
+        flex: 0 0 auto;
+        margin: 0 var(--nav-inset) var(--nav-offset);
+    }
+    .nav-tab { margin: 4px 2px; }
+    .nav-tab i svg { width: 20px; height: 20px; }
+    .panel-content { padding: 8px 12px 10px; }
+    .tools-list { gap: 10px; }
+}
+/* G14: the compact-phone panel height lives in components.css (one definition per breakpoint). */
+
+/* ---------- Y8: curves canvas scales with the panel (320x180 backing store, 16:9) ---------- */
+.curves-container { width: 100%; }
+.curves-svg {
+    display: block; width: 100%; max-width: 320px; height: auto; aspect-ratio: 16 / 9;
+    margin-inline: auto;
+}
+.curve-channels { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.channel-btn.ch-red   { color: #ff6b6b; }
+.channel-btn.ch-green { color: #51cf66; }
+.channel-btn.ch-blue  { color: #339af0; }
+.channel-btn.ch-red.active, .channel-btn.ch-green.active, .channel-btn.ch-blue.active { color: #fff; }
+.channel-btn { font-size: 11px; }
+.curve-reset-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    font-size: 11px; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-family: inherit;
+}
+.curve-reset-btn:active { background: var(--border-light); }
+.curve-reset-btn:focus-visible, .channel-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.curves-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin: 4px 0 0; }
+
+/* ---------- Y9: slider label collision guard. The label shrinks / wraps (max 2 lines) and the value keeps
+   its own fixed room, so "Brightness -100" can never touch the minus button - also in Arabic / RTL. ---------- */
+.tool-meta {
+    width: clamp(78px, 27vw, 112px);
+    min-width: 0;
+    gap: 6px;
+    align-items: center;
+    overflow: hidden;
+}
+.tool-meta > span:first-child {
+    flex: 1 1 auto; min-width: 0;
+    white-space: normal; overflow-wrap: anywhere;
+    line-height: 1.15;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    text-align: start;
+}
+.tool-meta .tool-value {
+    flex: 0 0 auto; min-width: 3.4ch;
+    text-align: end;
+}
+@media (max-width: 360px) { .tool-meta { font-size: 11px; } }

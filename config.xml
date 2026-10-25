@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.yassin.yofilter" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>YoFilter</name>
+    <description>Professional Mobile Photo Editor powered by WebGL and AI.</description>
+    <author email="mmyasomm@gmail.com">Yassin Mohamed</author>
+    <content src="index.html" />
+
+    <!-- Network access: ONLY the YoFilter API. The MediaPipe segmenter is bundled in www/vendor/mediapipe (run
+         python scripts/fetch_mediapipe_assets.py before building the app; there is no CDN fallback any more).
+         The API line below is STAMPED from "native_api_base" in version.json (one source for this file, the CSP in
+         index.html and NATIVE_API_BASE in js/config/app-config.js): never edit it by hand.
+         Set it with: python scripts/sync_version.py --native-api-base https://api.yourdomain.com
+         Check before building the app: python scripts/sync_version.py --release -->
+    <!-- yofilter:native-api:begin --><access origin="https://web-production-7211e.up.railway.app" /><!-- yofilter:native-api:end -->
+    <allow-intent href="https://*/*" />
+    <allow-intent href="mailto:*" />
+    <!-- The app never navigates away from its own pages (no allow-navigation wildcard). -->
+
+    <icon src="icon.png" />
+
+    <plugin name="cordova-plugin-file" />
+    <!-- Saves exports into the gallery through MediaStore (Android 10+) / PhotoKit (iOS); no broad storage permission. -->
+    <plugin name="cordova-plugin-photo-library" spec="^2.2.0">
+        <variable name="PHOTO_LIBRARY_USAGE_DESCRIPTION" value="YoFilter saves your edited photos to your photo library." />
+    </plugin>
+
+    <preference name="Orientation" value="portrait" />
+    <preference name="Fullscreen" value="false" />
+    <preference name="AndroidXEnabled" value="true" />
+    <!-- Android-only build. Platform targets are pinned here so every build is reproducible. -->
+    <preference name="android-minSdkVersion" value="24" />
+    <preference name="android-targetSdkVersion" value="34" />
+    <engine name="android" spec="^13.0.0" />
+
+    <platform name="android">
+        <!-- HTTPS only: cleartext HTTP stays blocked -->
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:usesCleartextTraffic="false" />
+        </edit-config>
+        <!-- Legacy storage permission only for Android 9 and older; Android 10+ uses MediaStore (no permission needed to add images) -->
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+        </config-file>
+    </platform>
+</widget>

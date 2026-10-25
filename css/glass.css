@@ -1,0 +1,53 @@
+/* ===== glass.css - glassmorphic controls for the loading overlay ===== */
+/* Cancel button shown while a long AI request is running (see js/ui/loading-toast.js). */
+.island-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    min-width: 96px;
+    padding: 0 22px;
+    margin-top: 4px;
+    border-radius: 9999px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* display:inline-flex above would otherwise win over the [hidden] attribute */
+.island-cancel[hidden] { display: none; }
+.island-cancel:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--border-hover);
+    transform: scale(1.04);
+}
+.island-cancel:active {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(0.96);
+}
+.island-cancel:focus-visible {
+    outline: 2px solid var(--accent-light);
+    outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .island-cancel { transition: none; }
+    .island-cancel:hover, .island-cancel:active { transform: none; }
+}
+/* RTL / Arabic: the label follows the page direction and uses the Arabic-capable font stack */
+body.rtl .island-cancel {
+    direction: rtl;
+    font-family: 'Cairo', 'Tajawal', 'Noto Sans Arabic', sans-serif;
+    letter-spacing: 0;
+}
+/* ===== END glass.css ===== */

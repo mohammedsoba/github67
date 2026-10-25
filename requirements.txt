@@ -1,0 +1,39 @@
+# Runtime dependencies - STRICT pins (every package, transitive ones included, is pinned with ==).
+# Source of truth: the `pip freeze` of the working Windows environment, restricted to what the server imports (plus its transitive
+# closure) and reconciled with the versions CI / tests/backend/golden.json were generated with. Railway / Docker install this file.
+# Test-only packages live in requirements-dev.txt. Python version: .python-version (3.11).
+
+# --- web stack ---------------------------------------------------------------------------------------------------------------
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn==0.54.0
+python-multipart==0.0.32        # security floor: multipart DoS fixes (CVE-2024-53981, fixed in 0.0.18) are included
+pydantic==2.13.5
+pydantic_core==2.46.5
+annotated-doc==0.0.5
+annotated-types==0.8.0
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+anyio==4.15.1
+idna==3.19
+sniffio==1.3.1
+click==8.5.0
+h11==0.16.0
+colorama==0.4.6; sys_platform == "win32"      # click on Windows
+
+# --- compression (optional at runtime: without it the server serves gzip only) ------------------------------------------------
+brotli==1.1.0                   # NOT in the supplied freeze (that environment serves gzip only); remove this line to stay gzip-only
+
+# --- numerics: golden.json records onnxruntime 1.24.4 / numpy 2.4.4 / opencv 4.13.0.92 / Pillow 12.1.1 ---------------------------
+# Windows gets the DirectML build (GPU via DirectX 12; it contains the CPU provider as well). Install only ONE of
+# onnxruntime / onnxruntime-directml (pip uninstall both first when switching, or the two packages overwrite each other's files).
+onnxruntime-directml==1.24.4; sys_platform == "win32"
+onnxruntime==1.24.4; sys_platform != "win32"
+flatbuffers==25.12.19
+protobuf==7.36.2
+packaging==26.3
+sympy==1.14.0
+mpmath==1.3.0
+numpy==2.4.4
+Pillow==12.1.1
+opencv-python-headless==4.13.0.92

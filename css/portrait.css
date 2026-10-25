@@ -1,0 +1,101 @@
+/* ===== portrait.css — Portrait Mode styles (lines 381-407) ===== */
+        /* ===== PORTRAIT MODE STYLES ===== */
+        #portrait-panel-content { padding: 8px 0; }
+        #portrait-panel-content .tools-list { gap: 8px; }
+        #portrait-panel-content .studio-btn-row { gap: 8px; flex-wrap: wrap; }
+        #portrait-panel-content .ai-desc { font-size: 11px; margin-top: 8px; }
+        /* Error state (first-run failure / queue still busy after the automatic retries): message + Try again. */
+        #portrait-panel-content .portrait-error { text-align: center; padding: 16px; margin-top: 10px; border-radius: 10px;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+        #portrait-panel-content .portrait-error__text { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--danger); }
+/* ===== END portrait.css ===== */
+
+/* ===== Portrait: canvas-panel processing indicator (the counter orb lives in css/loading-orb.css) =====
+   Top-centre on purpose: the bottom-left of the canvas holds the floating Undo / Original buttons, and a bottom-centre orb
+   overlapped them on every phone width (320 / 360 / 390 px, measured). Nothing else lives at the top edge. */
+.portrait-canvas-loader {
+    position: absolute; inset: 0; z-index: 40;
+    display: none; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px;
+    padding-top: 16px; background: transparent;
+    pointer-events: none; opacity: 0;
+}
+.portrait-canvas-loader.on { display: flex; animation: portraitLoaderIn 0.25s ease forwards; }
+@keyframes portraitLoaderIn { to { opacity: 1; } }
+/* Status line under the orb: a glass pill so it stays readable on any photo. */
+.portrait-canvas-loader__text {
+    max-width: calc(100% - 32px); padding: 5px 12px; border-radius: 999px;
+    background: rgba(15, 15, 18, 0.60);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    color: var(--text-primary, #f5f5f7); font-size: 12px; font-weight: 600; line-height: 1.3;
+    text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+    .portrait-canvas-loader.on { animation: none; opacity: 1; }
+}
+
+/* ===== Portrait: tap-to-focus indicator (pulsing ring + crosshair) ===== */
+.portrait-focus-ring {
+    position: absolute; z-index: 45; width: 72px; height: 72px;
+    margin: -36px 0 0 -36px; pointer-events: none;
+    opacity: 0; transform: scale(1.6);
+    transition: opacity 0.28s ease, transform 0.28s cubic-bezier(.2,.8,.2,1);
+    will-change: transform, opacity;
+}
+.portrait-focus-ring.on  { opacity: 1; transform: scale(1); }
+.portrait-focus-ring.out { opacity: 0; transform: scale(0.9); transition-duration: 0.25s; }
+.portrait-focus-ring .pf-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(0, 0, 0, 0.2), 0 0 16px rgba(0, 0, 0, 0.25);
+}
+.portrait-focus-ring .pf-pulse {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid var(--accent-light, #a5b4fc); opacity: 0;
+}
+.portrait-focus-ring.on .pf-pulse { animation: portraitFocusPulse 1s ease-out infinite; }
+.portrait-focus-ring .pf-cross { position: absolute; inset: 0; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.7)); }
+@keyframes portraitFocusPulse {
+    0%   { opacity: 0.85; transform: scale(1); }
+    100% { opacity: 0;    transform: scale(1.55); }
+}
+#viewport.portrait-focus-cursor { cursor: crosshair; }
+@media (prefers-reduced-motion: reduce) {
+    .portrait-focus-ring { transition-duration: 0.01s; }
+    .portrait-focus-ring.on .pf-pulse { animation: none; }
+}
+
+/* ===== Portrait: dedicated side-toolbar "Set Focus" tool ===== */
+.portrait-side-rail {
+    position: absolute; z-index: 50; top: 50%;
+    inset-inline-end: 10px; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 8px; padding: 6px;
+    border-radius: 16px; background: rgba(22, 22, 26, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.26);
+    touch-action: manipulation;
+}
+.portrait-side-rail[hidden] { display: none; }
+.psr-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    width: 52px; min-height: 52px; padding: 6px 2px; border-radius: 12px; cursor: pointer;
+    font: inherit; font-size: 10px; font-weight: 700; line-height: 1.1; text-align: center;
+    color: var(--text-primary, #ededf1); background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.psr-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.psr-btn:focus-visible { outline: 2px solid var(--accent-light, #a5b4fc); outline-offset: 2px; }
+/* Armed: the next tap on the photo sets the focal point */
+.psr-btn.active {
+    background: var(--accent, #6366f1); border-color: var(--accent-light, #a5b4fc); color: #fff;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.19); animation: psrArmed 1.2s ease-in-out infinite;
+}
+@keyframes psrArmed { 50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.12); } }
+@media (prefers-reduced-motion: reduce) { .psr-btn.active { animation: none; } }
+@media (max-width: 480px) {
+    .portrait-side-rail { inset-inline-end: 6px; padding: 4px; }
+    .psr-btn { width: 46px; min-height: 46px; }
+}

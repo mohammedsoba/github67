@@ -1,0 +1,95 @@
+/* ===== mobile.css — responsive layout for phones & tablets (iOS + Android) =====
+ * Goals: no vertical page overflow, no double scrollbars, and a canvas /
+ * toolbar / sliders that scale with the *visible* viewport.
+ *   - 100vh on iOS Safari / Android Chrome includes the collapsing browser
+ *     bars, which pushed the bottom toolbar off-screen. 100dvh tracks the
+ *     visible area (100% fallback for older engines).
+ *   - Safe-area insets (notch, home indicator) are applied once, at the edges.
+ *   - Only .panel-content scrolls (inside the editing panel); nothing else does.
+ * Loaded after components.css / responsive.css and before rtl.css.
+ * ================================================================================ */
+
+html, body { height: 100%; overscroll-behavior: none; }
+.app {
+    height: 100%;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+}
+@supports (height: 100dvh) {
+    html, body { height: 100dvh; }
+    .app { height: 100dvh; max-height: 100dvh; }
+}
+
+/* G14: .top-bar (notch-clearing header) and .control-panel (panel height, no double home-indicator padding) are
+   defined once, in components.css. */
+
+/* The single intentional scroller. */
+.panel-content {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.panel-content::-webkit-scrollbar { width: 4px; }
+.panel-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 4px; }
+
+/* Never let the workspace create its own scrollbars. */
+.viewport, .image-container { overflow: hidden; }
+.sub-menu-bar { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+
+/* Modals and full-screen pages must fit the visible viewport. */
+.modal-content { max-height: 92vh; overflow-y: auto; overscroll-behavior: contain; }
+@supports (height: 100dvh) { .modal-content { max-height: 92dvh; } }
+#settingsPage, #aboutPage { height: 100%; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+/* The upload box shrinks on narrow screens. */
+.upload-box { width: min(280px, 86%); }
+
+/* Mask status / analyzer chatter is not shown to the user. */
+.mask-status, #mask-status { display: none !important; }
+
+/* ---------- Tablets & phones ---------- */
+@media (max-width: 768px) {
+    .viewport { padding: 4px; }
+    .panel-content { padding: 12px 14px; }
+    .tool-meta { width: 96px; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 480px) {
+    .sub-menu-bar { padding: 8px 10px; gap: 6px; }
+    .sub-btn { padding: 6px 12px; }
+    .panel-content { padding: 10px 12px; }
+    .tools-list { gap: 12px; }
+    .tool-row { gap: 8px; }
+    .tool-meta { width: 84px; font-size: 11.5px; }
+    .nav-tab span { font-size: 9px; }
+}
+
+/* ---------- Small phones (iPhone SE / 320-360px Androids) ---------- */
+@media (max-width: 360px) {
+    .tool-meta { width: 72px; font-size: 11px; }
+    .tool-btn { width: 26px; height: 26px; }
+    .sub-btn { padding: 6px 10px; font-size: 11.5px; }
+    .nav-tab span { font-size: 8.5px; letter-spacing: 0; }
+}
+
+/* ---------- Touch devices: bigger sliders & hit areas ---------- */
+@media (pointer: coarse) {
+    .tool-slider { height: 5px; touch-action: pan-y; }
+    .tool-slider::-webkit-slider-thumb { width: 24px; height: 24px; }
+    .tool-slider::-moz-range-thumb { width: 24px; height: 24px; }
+    .tool-btn { width: 32px; height: 32px; }
+}
+
+/* ---------- Landscape phones: keep the canvas tall enough ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+    .top-btn { min-height: 34px; }
+    .main-nav { height: 48px; min-height: 48px; }
+    .nav-tab { gap: 2px; }
+    .sub-menu-bar { height: 42px; min-height: 42px; padding: 5px 10px; }
+}
+/* ===== END mobile.css ===== */

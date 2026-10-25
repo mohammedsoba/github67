@@ -1,0 +1,107 @@
+/* ===== mask.css — AI Mask selective editing panel (new feature) ===== */
+.mask-panel { display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 8px; }
+
+.mask-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+}
+.mask-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.4px;
+    color: var(--text-primary); display: flex; align-items: center; gap: 6px;
+    text-transform: uppercase;
+}
+.mask-title .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-gradient); box-shadow: 0 0 8px var(--accent-glow);
+}
+.mask-hint { font-size: 10px; color: var(--text-muted); }
+
+.mask-auto-btn {
+    width: 100%;
+    background: var(--accent-gradient);
+    color: #fff; border: none; cursor: pointer;
+    padding: 11px 16px; border-radius: var(--radius-md);
+    font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.19);
+    transition: transform 0.18s ease, box-shadow 0.22s ease, opacity 0.2s ease;
+}
+.mask-auto-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(99, 102, 241, 0.25); }
+.mask-auto-btn:active { transform: scale(0.98); }
+.mask-auto-btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.mask-auto-btn svg { flex-shrink: 0; }
+
+.mask-chips {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.mask-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 10px 6px 9px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+    position: relative; overflow: hidden;
+}
+.mask-chip:hover { background: var(--bg-raised); color: var(--text-primary); border-color: var(--border-hover); }
+.mask-chip .chip-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+    transition: all 0.22s ease;
+}
+.mask-chip .chip-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+.mask-chip.active {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: var(--shadow-glow);
+}
+.mask-chip.active .chip-icon {
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.mask-status {
+    font-size: 11px; color: var(--text-muted);
+    text-align: center; padding: 6px 0;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.mask-status .spin {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: var(--accent-light);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+.mask-controls { display: none; flex-direction: column; gap: 4px; }
+.mask-controls.visible { display: flex; animation: fadeIn 0.22s ease; }
+
+.mask-actions {
+    display: flex; gap: 8px; padding-top: 6px;
+}
+.mask-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s ease;
+}
+.mask-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); border-color: var(--border-hover); }
+.mask-btn.primary {
+    background: var(--accent-gradient); color: #fff; border-color: transparent;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.18);
+}
+.mask-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.25); }
+.mask-btn.danger { color: var(--danger); }
+.mask-btn.danger:hover { background: rgba(239,107,126,0.10); border-color: rgba(239,107,126,0.35); }
+
+/* ===== END mask.css ===== */

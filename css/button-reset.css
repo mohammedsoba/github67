@@ -1,0 +1,15 @@
+/* button-reset.css - Y17. Loaded FIRST. Elements that used to be <div onclick> are real <button>s now.
+   Plain single-class selectors (same specificity as the component rules, earlier in the cascade) neutralise
+   the browser's button chrome; every component stylesheet that follows still wins wherever it sets a value. */
+.preset-item, .mask-chip, .frame-item, .color-dot, .opt-box {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}

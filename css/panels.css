@@ -1,0 +1,323 @@
+/* ===================================================
+   panels.css — Frame Panel UI styles
+   Only affects the #p-fit-panel (Frame tab).
+   All other sections are untouched.
+
+   Glass polish: translucent cards + pills built from the same tokens as the bottom nav / sub-tabs
+   (polish.css: --accent-fill, --accent-edge, --text-inactive, --glass-*). Selectors, ids and the DOM that
+   fit-frame.js renders are unchanged; only presentation moved.
+   =================================================== */
+
+/* Frame-tab-local design tokens */
+#p-fit-panel {
+    --fp-gutter: 12px;                         /* breathing room the scrollers keep so glows are never clipped */
+    --fp-glass: rgba(255, 255, 255, 0.05);     /* bg-white/5 */
+    --fp-glass-hover: rgba(255, 255, 255, 0.09);
+    --fp-stroke: rgba(255, 255, 255, 0.08);    /* border-white/8 */
+    --fp-hi: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --fp-accent-rgb: 99, 102, 241;
+}
+
+/* ---- Category pill bar ----
+   Horizontal scrollers clip their own overflow, which would shave the active glow flat. Each scroller therefore
+   bleeds --fp-gutter past the panel padding (negative margin) and pads itself by the same amount (see the
+   #p-fit-panel / .panel-inner rules at the bottom, which extend the clip boxes of the ancestors to match). */
+.frame-cats {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 calc(var(--fp-gutter) * -1);
+    padding: 6px var(--fp-gutter) 8px;
+    scroll-padding-inline: var(--fp-gutter);
+    scrollbar-width: none;
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+}
+.frame-cats::-webkit-scrollbar { display: none; }
+
+.frame-cat {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--fp-stroke);
+    background: var(--fp-glass);
+    box-shadow: var(--fp-hi);
+    color: var(--text-inactive, #9a9aa6);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.frame-cat:active { transform: scale(0.96); }
+.frame-cat.active {
+    background: var(--accent-fill, rgba(99, 102, 241, 0.16));
+    border-color: var(--accent-edge, rgba(99, 102, 241, 0.35));
+    color: var(--text-primary);
+    box-shadow: var(--fp-hi), 0 0 10px rgba(var(--fp-accent-rgb), 0.16);
+}
+.frame-cat:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+
+/* ---- Frame thumbnail grid (glass cards) ---- */
+.frame-grid {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 calc(var(--fp-gutter) * -1);
+    padding: 8px var(--fp-gutter) 10px;        /* top: lift + glow, bottom: drop glow */
+    scroll-padding-inline: var(--fp-gutter);
+    scrollbar-width: none;
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+}
+.frame-grid::-webkit-scrollbar { display: none; }
+
+/* The card. Idle = frosted glass: bg-white/5, 1px border-white/10, rounded-xl, faint top highlight.
+   (backdrop-filter is intentionally NOT on the idle cards: up to 52 blurred layers in a scroller is costly on
+   low-end phones, and over this flat panel background it would be visually identical to the translucent fill.) */
+.frame-item {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: 76px;                               /* widest label ("Thin White", 60px @ 11px) + ~4px slack */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 5px;
+    text-align: center;
+    background: var(--fp-glass);
+    border: 1px solid var(--fp-stroke);
+    border-radius: 12px;                       /* rounded-xl */
+    box-shadow: var(--fp-hi);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.frame-item:active { transform: scale(0.97); }
+.frame-item:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+@media (hover: hover) {
+    .frame-item:hover { background: var(--fp-glass-hover); border-color: rgba(255, 255, 255, 0.18); }
+}
+
+/* Selected: glowing accent hairline + a small lift with a backdrop blur, instead of a heavy 2px ring.
+   The border stays 1px, so nothing in the strip shifts when the selection changes. */
+.frame-item.active {
+    background: var(--accent-fill, rgba(99, 102, 241, 0.16));
+    border-color: rgba(var(--fp-accent-rgb), 0.65);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 4px 14px -6px rgba(var(--fp-accent-rgb), 0.36),
+        0 0 8px rgba(var(--fp-accent-rgb), 0.12);
+    transform: translateY(-2px) translateZ(0);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+}
+.frame-item.active:active { transform: translateY(-1px) scale(0.98) translateZ(0); }
+
+.frame-thumb {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    margin: 0;
+    border: 0;
+    border-radius: var(--radius-sm, 9px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    /* hairline as an inset ring so the preview reads against any frame colour (neon frames override this inline) */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.26);
+    transition: box-shadow 0.2s ease;
+}
+.frame-item.active .frame-thumb { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3); }
+.frame-thumb-img-placeholder {
+    width: 54%;
+    height: 54%;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Label: 11px, real line box (1.3) so descenders in "Gray"/"Purple"/"Instagram" are never shaved,
+   #9a9aa6 idle / full-contrast when selected. Ellipsis stays as a last-resort guard only. */
+.frame-item span {
+    display: block;
+    width: 100%;
+    padding-bottom: 1px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: var(--text-inactive, #9a9aa6);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+}
+.frame-item.active span { color: var(--text-primary); }
+
+/* ---- Divider between grid and controls ---- */
+.frame-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0 6px;
+    flex-shrink: 0;
+}
+
+/* ---- Controls section ---- */
+.frame-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+/* 30px rows: the 24px touch slider thumb (mobile.css) needs the room, otherwise neighbouring thumbs stack on top of each other */
+.frame-ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 30px;
+}
+.frame-ctrl-lbl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    width: 64px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.frame-ctrl-val {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-light);
+    width: 26px;
+    text-align: end;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Color row */
+.frame-color-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+.frame-color-input {
+    width: 34px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9px;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    flex-shrink: 0;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    overflow: hidden;
+}
+.frame-color-input:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.frame-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.frame-color-input::-webkit-color-swatch { border: none; border-radius: 8px; }
+.frame-color-input::-moz-color-swatch { border: none; border-radius: 8px; }
+
+/* Toggle + Reset: same translucent pill language as the category bar */
+.frame-color-toggle,
+.frame-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 13px;
+    border-radius: 999px;
+    border: 1px solid var(--fp-stroke);
+    background: var(--fp-glass);
+    box-shadow: var(--fp-hi);
+    color: var(--text-inactive, #9a9aa6);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.frame-color-toggle:active,
+.frame-reset-btn:active { transform: scale(0.96); }
+.frame-color-toggle:focus-visible,
+.frame-reset-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.frame-color-toggle.on {
+    background: var(--accent-fill, rgba(99, 102, 241, 0.16));
+    border-color: var(--accent-edge, rgba(99, 102, 241, 0.35));
+    color: var(--text-primary);
+    box-shadow: var(--fp-hi), 0 0 8px rgba(var(--fp-accent-rgb), 0.14);
+}
+.frame-reset-btn { margin-inline-start: auto; }
+@media (hover: hover) {
+    .frame-color-toggle:hover { background: var(--fp-glass-hover); border-color: rgba(255, 255, 255, 0.18); color: var(--text-primary); }
+    .frame-color-toggle.on:hover { background: var(--accent-fill, rgba(99, 102, 241, 0.16)); border-color: var(--accent-edge, rgba(99, 102, 241, 0.35)); }
+    .frame-reset-btn:hover { background: rgba(239, 107, 126, 0.12); border-color: rgba(239, 107, 126, 0.40); color: var(--danger); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .frame-cat, .frame-item, .frame-thumb, .frame-item span,
+    .frame-color-toggle, .frame-reset-btn { transition: none; }
+    .frame-cat:active, .frame-item:active, .frame-item.active:active,
+    .frame-color-toggle:active, .frame-reset-btn:active { transform: none; }
+    .frame-item.active { transform: none; }
+}
+
+/* ---- p-fit-panel internal layout ----
+   Each ancestor that clips (overflow) bleeds --fp-gutter into .panel-content's side padding and pads itself back,
+   so its content box is unchanged (everything keeps its alignment) while the clip box is wide enough for the
+   scrollers' glow. .panel-content's side padding is >= 12px at every breakpoint (mobile.css), so this never
+   causes page overflow. */
+#p-fit-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* Like every other panel (polish.css §5) the content scrolls UNDER the floating nav pill and comes to rest clear of
+       it: the scroll window runs down into .panel-content's bottom padding (= --nav-reserve + 4px), and .panel-inner
+       pads its end by the same amount. The next row therefore shows blurred through the glass pill - a scroll cue that
+       costs no space, which matters on 360x640 where the first control row would otherwise be fully below the fold. */
+    height: calc(100% + var(--nav-reserve, 0px) + 4px);
+    overflow: hidden;
+    margin-inline: calc(var(--fp-gutter) * -1);
+    padding-inline: var(--fp-gutter);
+}
+#p-fit-panel .panel-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    margin-inline: calc(var(--fp-gutter) * -1);
+    padding-inline: var(--fp-gutter);
+    padding-bottom: calc(var(--nav-reserve, 0px) + 4px);   /* last row rests clear of the pill */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+#p-fit-panel .panel-inner::-webkit-scrollbar { width: 3px; }
+#p-fit-panel .panel-inner::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+/* Landscape phones: the nav pill sits in the page flow (polish.css §5), so there is nothing to scroll under. */
+@media (max-height: 520px) and (orientation: landscape) {
+    #p-fit-panel { height: 100%; }
+    #p-fit-panel .panel-inner { padding-bottom: 4px; }
+}

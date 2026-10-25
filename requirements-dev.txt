@@ -1,0 +1,13 @@
+# Test-only dependencies. Install AFTER requirements.txt:  pip install -r requirements.txt -r requirements-dev.txt
+# The numerics (onnxruntime / numpy / opencv / Pillow) are pinned in requirements.txt and must not be repeated here.
+# To upgrade one of them: bump the pin there, run `UPDATE_GOLDEN=1 pytest tests/backend`, review and commit golden.json.
+
+# Starlette's TestClient (1.x) wants httpx2; the tests also use httpx.ASGITransport directly, so both stacks are pinned.
+httpx==0.28.1
+httpcore==1.0.9
+httpx2==2.13.1
+httpcore2==2.13.1
+certifi==2026.7.22
+
+# Not in the supplied freeze (that environment does not run the tests), so only range-bounded here:
+pytest>=8,<9

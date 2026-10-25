@@ -1,0 +1,24 @@
+# YoFilter V22 - Part 2, Task 2 (Y10-Y18)
+
+New: `js/ui/a11y.js`, `css/a11y.css`, `css/button-reset.css`, `tests/ui/v22_test.js` (15 checks).
+Removed: `js/i18n/i18n-patch.js`.  Test run: 12 UI suites pass (the 4 backend-free suites were adapted, see bottom).
+
+| Task | What changed | Files |
+|---|---|---|
+| Y10 | `<html dir="rtl">` already mirrors rows; the old `flex-direction: row-reverse` rules mirrored them a SECOND time (net effect: not mirrored). All removed. Kept as deliberate LTR islands: slider rows (-/slider/+), Color Mix hue order, curves canvas, eraser toolbar. Physical margins/paddings -> `margin-inline-*`, `padding-inline-*`, `text-align: start/end`; inline `margin-right` on icons -> `.btn-ico`; a few physical `right/left` offsets flip via `[dir=rtl]`. | rtl.css, components.css, panels.css, a11y.css, index.html |
+| Y11 | `t(key, {params})` with `{placeholder}` support. i18n-patch.js (exact-string matching, and it mapped "Could not analyze image" to the wrong key) is deleted; every toast / loading text / API error now calls `window.t('key')`. 130 new keys, EN = AR. `data-i18n-alt` and `data-i18n-aria` attributes; alt text and ARIA labels translated; `yofilter:i18n` event re-renders dynamic labels. | i18n.js, api-client.js, ~20 call-site files, index.html |
+| Y12 | Crop: minimum size enforced BEFORE positioning; resize anchored at the opposite corner (no more drifting box); exact ratio at every step and exact integer ratio output (16:9 is really 16:9); tap/tiny drag restores the previous box with a message; Apply is single-flight (button disabled while encoding); ratio activation de-duplicated; undersized crops are refused with a message. | crop.js |
+| Y13 | Custom colour disabled (picker + switch + note) for neon, frost, gradient and translucent frames; padding capped at 12% of the shorter workspace side (same function feeds preview and export); the photo is clipped to the frame's inner radius in preview AND export. | fit-frame.js, modals-export.js, a11y.css, index.html |
+| Y14 | No `:has()` and no `[style*=]`: `body.photo-loaded`, `body.crop-active`, `body.eraser-active`; crop box/bar use `.is-visible` classes. | polish.css, components.css, crop.js, file-handler.js, magic-eraser.js |
+| Y15 | Compare slider markup/CSS/JS removed; quick-text hint (HTML, CSS, dictionary, dead `setupDoubleTap`) removed. The held "Original" is now cropped like the edited photo (crop rectangle kept in history states, composed for repeated crops). | compare.js, index.html, components.css, init.js, gestures.js, history.js |
+| Y16 | Export tiers named for what they do: "Small file (JPEG 60%)", "Standard (JPEG 92%)", "Lossless (PNG)"; subtitle says exports use the editing resolution (long edge up to 2560 px). "yf" watermark: Settings switch (`role="switch"`), default ON, stored in `localStorage.yofilter_watermark`. | i18n.js, modals-export.js, watermark.js, index.html |
+| Y17 | Crop ratios, mask chips, filters, Color Mix dots, frame items are real `<button>`s with `aria-pressed`/labels; `aria-pressed`/`aria-current` follow the `.active` class; Premium + Export modals are `role="dialog" aria-modal` with labels, focus in/out and a Tab trap (Settings/About trapped too); close buttons labelled; shared live region (`YoA11y.announce`) for hold-Original and crop size; loading overlay is a live region. | a11y.js, index.html, presets.js, color-mix.js, fit-frame.js, navigation.js |
+| Y18 | Eraser strokes (vector, source pixels) survive reloads that keep the same pixel size (colour edit, tab switch, re-bake); cleared after a removal and on a new photo. "Download HD" re-renders the working image at full working resolution with the latest edits (it used to save whatever the eraser had loaded last). | magic-eraser.js, file-handler.js |
+
+## Limits you should know about
+- No browser was available here: everything was verified with the node test suites and static checks, NOT rendered. Please check Arabic at 360x640 (top bar, tool rows, Frame tab, Settings) and the crop handles on a real phone.
+- Photos are still scaled to max 2560 px on the long edge when opened (file-handler `MAX_EDIT_DIM`). "Full resolution" in Y18 means that working resolution, not the camera original. Raising it is a memory trade-off I did not change.
+- Frame names, filter names and the Premium feature list are still English in Arabic mode (not toasts/alt/ARIA).
+- Photo corners: with a frame active the photo now uses the frame's inner radius (square when padding >= radius) instead of the fixed 16 px, so preview = export.
+- The two modal backdrops keep their click-to-dismiss `<div onclick>` (mouse convenience); keyboard users have Escape and the labelled Close button.
+- Tests adapted: `cancel_progress_test` loads the real `i18n.js` instead of the deleted patch; `history_frame_test`/`presets_test` got small stubs; `save_image_test` follows the new HD export code.
